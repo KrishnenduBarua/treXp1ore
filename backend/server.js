@@ -48,19 +48,27 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// Start only after the database is reachable and the required tables exist.
-ensureTables()
-  .then(() => {
+async function startServer() {
+  if (!process.env.JWT_SECRET?.trim()) {
+    console.error(
+      "[startup] JWT_SECRET is missing. Set it in the Render service environment.",
+    );
+    await pool.end();
+    process.exitCode = 1;
+    return;
+  }
+
+  try {
+    await ensureTables();
     console.log("Database tables ready");
     app.listen(PORT, () =>
       console.log(`TreXplore API running on port ${PORT}`),
     );
-  })
-  .catch(async (err) => {
-    console.error(
-      "[startup] Database initialization failed:",
-      err.message,
-    );
+  } catch (err) {
+    console.error("[startup] Database initialization failed:", err.message);
     await pool.end();
     process.exitCode = 1;
-  });
+  }
+}
+
+startServer();
