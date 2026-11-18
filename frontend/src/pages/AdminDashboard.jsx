@@ -193,9 +193,13 @@ export default function AdminDashboard() {
                 id="destination-image"
                 type="file"
                 accept="image/avif,image/gif,image/jpeg,image/png,image/webp"
-                onChange={(event) => setImageFile(event.target.files?.[0] || null)}
+                onChange={(event) =>
+                  setImageFile(event.target.files?.[0] || null)
+                }
               />
-              {form.image_url && !imageFile && <span className="muted">Current image is saved.</span>}
+              {form.image_url && !imageFile && (
+                <span className="muted">Current image is saved.</span>
+              )}
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button className="btn btn-primary" disabled={submitting}>

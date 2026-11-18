@@ -44,9 +44,10 @@ export const Destination = {
   },
 
   async findById(id) {
-    const result = await pool.query("SELECT * FROM destinations WHERE id = $1", [
-      id,
-    ]);
+    const result = await pool.query(
+      "SELECT * FROM destinations WHERE id = $1",
+      [id],
+    );
     return result.rows[0];
   },
 
@@ -108,8 +109,10 @@ export const Destination = {
     if (!fields.length) return this.findById(id);
 
     params.push(id);
-    params.push(id);
-    await pool.query(`UPDATE destinations SET ${fields.join(", ")}, updated_at = NOW() WHERE id = $${params.length}`, params);
+    await pool.query(
+      `UPDATE destinations SET ${fields.join(", ")}, updated_at = NOW() WHERE id = $${params.length}`,
+      params,
+    );
     return this.findById(id);
   },
 

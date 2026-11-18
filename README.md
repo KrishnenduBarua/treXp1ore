@@ -8,7 +8,7 @@ stories. Built for CSE-356 Software Engineering, CUET.
 
 ```
 trexplore/
-├── backend/     Express API, MySQL models, JWT auth
+├── backend/     Express API, PostgreSQL models, JWT auth
 └── frontend/    React app (Vite + React Router)
 ```
 
@@ -77,6 +77,7 @@ The app runs on `http://localhost:5173` and talks to the API at
 ## 4. Deployment
 
 **Supabase**
+
 - Run `backend/database/schema.sql` in the Supabase SQL Editor.
 - Create a public Storage bucket named `trexplore-media` for destination and
   story images.
@@ -84,6 +85,7 @@ The app runs on `http://localhost:5173` and talks to the API at
   `DATABASE_URL`. Keep the service role key exclusively in Render.
 
 **Render**
+
 - Create a Blueprint from `render.yaml` or a web service with `backend` as its
   root directory, `npm install` as its build command, and `npm start` as its
   start command.
@@ -94,6 +96,7 @@ The app runs on `http://localhost:5173` and talks to the API at
   admin user and starter destinations.
 
 **Vercel**
+
 - Import the repository with `frontend` as the project root. Vercel detects
   Vite; the build command is `npm run build` and the output directory is `dist`.
 - Set `VITE_API_URL` to your Render service URL followed by `/api`, then deploy.
@@ -106,6 +109,7 @@ password in Vercel variables or commit them to GitHub.
 ## 5. What's implemented
 
 **Travelers**
+
 - Browse destinations across all 8 divisions
 - Search and filter by division, district, category
 - View detailed destination pages (how to reach, best time to visit, entry fee)
@@ -116,6 +120,7 @@ password in Vercel variables or commit them to GitHub.
   each traveler's behaviour (see section 5)
 
 **Website management (admin role)**
+
 - Add, edit, and delete destinations from `/admin`
 - Organize destinations by division/district/category
 - Moderate blogs (any admin can delete a blog, not just the author)
@@ -129,13 +134,13 @@ backend — **no external AI service, API key or extra dependency is needed.**
 **What it observes** (logged automatically by the existing endpoints, no extra
 frontend calls):
 
-| Signal | Weight | Recorded when |
-|---|---|---|
-| Saved a place | 5 | Tapping “Save” on a destination page |
-| Wrote a story about a place | 4 | Publishing a story linked to a destination |
-| Read a story about a place | 1.5 | Opening a story linked to a destination |
-| Filtered by category / division | 1.2 | Using the filters on `/destinations` |
-| Viewed a place | 1 | Opening a destination page |
+| Signal                          | Weight | Recorded when                              |
+| ------------------------------- | ------ | ------------------------------------------ |
+| Saved a place                   | 5      | Tapping “Save” on a destination page       |
+| Wrote a story about a place     | 4      | Publishing a story linked to a destination |
+| Read a story about a place      | 1.5    | Opening a story linked to a destination    |
+| Filtered by category / division | 1.2    | Using the filters on `/destinations`       |
+| Viewed a place                  | 1      | Opening a destination page                 |
 
 Repeats within 30 minutes (10 for filters) are ignored so a refresh doesn't
 inflate interest. Signals lose half their influence every 30 days, so the model
@@ -188,28 +193,28 @@ cache the result per user for a few minutes.
 
 ## 7. API overview
 
-| Method | Route                       | Auth        | Description                    |
-|--------|------------------------------|-------------|---------------------------------|
-| POST   | /api/auth/register           | —           | Create an account               |
-| POST   | /api/auth/login               | —           | Log in, returns a JWT           |
-| GET    | /api/auth/me                  | user        | Current user                    |
-| GET    | /api/destinations             | —           | List/filter destinations        |
-| GET    | /api/destinations/:slug       | —           | Destination detail              |
-| POST   | /api/destinations             | admin       | Create a destination            |
-| PUT    | /api/destinations/:id         | admin       | Update a destination            |
-| DELETE | /api/destinations/:id         | admin       | Delete a destination            |
-| GET    | /api/blogs                    | —           | List blogs (filter by user/destination) |
-| GET    | /api/blogs/:slug              | —           | Blog detail                     |
-| POST   | /api/blogs                    | user        | Publish a blog                  |
-| PUT    | /api/blogs/:id                | owner/admin | Edit a blog                     |
-| DELETE | /api/blogs/:id                | owner/admin | Delete a blog                   |
-| PUT    | /api/users/me                 | user        | Update your profile             |
-| GET    | /api/favorites                | user        | Your saved destinations (+ ids) |
-| POST   | /api/favorites/:destinationId | user        | Save a destination              |
-| DELETE | /api/favorites/:destinationId | user        | Remove a saved destination      |
-| GET    | /api/recommendations          | optional    | AI picks (popular if not signed in / new) |
-| GET    | /api/recommendations/profile  | user        | What the AI has learned about you |
-| GET    | /api/recommendations/similar/:id | —        | Places similar to a destination |
+| Method | Route                            | Auth        | Description                               |
+| ------ | -------------------------------- | ----------- | ----------------------------------------- |
+| POST   | /api/auth/register               | —           | Create an account                         |
+| POST   | /api/auth/login                  | —           | Log in, returns a JWT                     |
+| GET    | /api/auth/me                     | user        | Current user                              |
+| GET    | /api/destinations                | —           | List/filter destinations                  |
+| GET    | /api/destinations/:slug          | —           | Destination detail                        |
+| POST   | /api/destinations                | admin       | Create a destination                      |
+| PUT    | /api/destinations/:id            | admin       | Update a destination                      |
+| DELETE | /api/destinations/:id            | admin       | Delete a destination                      |
+| GET    | /api/blogs                       | —           | List blogs (filter by user/destination)   |
+| GET    | /api/blogs/:slug                 | —           | Blog detail                               |
+| POST   | /api/blogs                       | user        | Publish a blog                            |
+| PUT    | /api/blogs/:id                   | owner/admin | Edit a blog                               |
+| DELETE | /api/blogs/:id                   | owner/admin | Delete a blog                             |
+| PUT    | /api/users/me                    | user        | Update your profile                       |
+| GET    | /api/favorites                   | user        | Your saved destinations (+ ids)           |
+| POST   | /api/favorites/:destinationId    | user        | Save a destination                        |
+| DELETE | /api/favorites/:destinationId    | user        | Remove a saved destination                |
+| GET    | /api/recommendations             | optional    | AI picks (popular if not signed in / new) |
+| GET    | /api/recommendations/profile     | user        | What the AI has learned about you         |
+| GET    | /api/recommendations/similar/:id | —           | Places similar to a destination           |
 
 ## 8. Notes for extending this
 

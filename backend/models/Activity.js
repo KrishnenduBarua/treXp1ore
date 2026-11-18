@@ -1,4 +1,4 @@
-import pool from '../config/db.js';
+import pool from "../config/db.js";
 
 // Minutes during which an identical action by the same user is not logged again
 // (stops a page refresh from counting as extra interest).
@@ -8,7 +8,13 @@ const DEDUPE_MINUTES = { view: 30, blog_read: 30, filter: 10, blog_write: 0 };
 const LOOKBACK_DAYS = 180;
 
 export const Activity = {
-  async record({ userId, destinationId = null, category = null, division = null, type }) {
+  async record({
+    userId,
+    destinationId = null,
+    category = null,
+    division = null,
+    type,
+  }) {
     const minutes = DEDUPE_MINUTES[type] ?? 30;
     await pool.query(
       `INSERT INTO user_events (user_id, destination_id, category, division, event_type)
@@ -21,14 +27,28 @@ export const Activity = {
            AND division IS NOT DISTINCT FROM $10
            AND created_at > NOW() - ($11 * INTERVAL '1 minute')
        )`,
-      [userId, destinationId, category, division, type, userId, type, destinationId, category, division, minutes]
+      [
+        userId,
+        destinationId,
+        category,
+        division,
+        type,
+        userId,
+        type,
+        destinationId,
+        category,
+        division,
+        minutes,
+      ],
     );
   },
 
   // Fire-and-forget: learning from behaviour must never slow down or break a
   // normal request, so errors are logged and swallowed.
   track(args) {
-    this.record(args).catch((err) => console.error('[activity] could not record event:', err.message));
+    this.record(args).catch((err) =>
+      console.error("[activity] could not record event:", err.message),
+    );
   },
 
   // Everything the recommender learns from: logged events, saved places
@@ -43,7 +63,7 @@ export const Activity = {
          FROM favorites
        UNION ALL
        SELECT user_id, destination_id, NULL AS category, NULL AS division, 'visited' AS event_type, created_at
-         FROM visited_places`
+         FROM visited_places`,
     );
     return result.rows;
   },

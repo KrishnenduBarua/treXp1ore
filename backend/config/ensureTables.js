@@ -1,4 +1,4 @@
-import pool from './db.js';
+import pool from "./db.js";
 
 // Creates the tables the AI recommendations need, if they don't exist yet.
 // Runs automatically when the server starts, so there is no separate
@@ -37,6 +37,10 @@ export async function ensureTables() {
   for (const sql of statements) {
     await pool.query(sql);
   }
-  await pool.query('CREATE INDEX IF NOT EXISTS idx_events_user_time ON user_events (user_id, created_at)');
-  await pool.query('CREATE INDEX IF NOT EXISTS idx_events_destination ON user_events (destination_id)');
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_events_user_time ON user_events (user_id, created_at)",
+  );
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_events_destination ON user_events (destination_id)",
+  );
 }
