@@ -11,6 +11,7 @@ import recommendationRoutes from "./routes/recommendationRoutes.js";
 import visitRoutes from "./routes/visitRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import { ensureTables } from "./config/ensureTables.js";
+import pool from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -47,18 +48,19 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// Make sure the AI tables exist, then start. If table creation fails we still
-// start (the rest of the site works) but print the real reason.
+// Start only after the database is reachable and the required tables exist.
 ensureTables()
-  .then(() => console.log("Database tables ready"))
-  .catch((err) =>
-    console.error(
-      "[db] Could not create the recommendation tables:",
-      err.message,
-    ),
-  )
-  .finally(() =>
+  .then(() => {
+    console.log("Database tables ready");
     app.listen(PORT, () =>
       console.log(`TreXplore API running on port ${PORT}`),
-    ),
-  );
+    );
+  })
+  .catch(async (err) => {
+    console.error(
+      "[startup] Database initialization failed:",
+      err.message,
+    );
+    await pool.end();
+    process.exitCode = 1;
+  });

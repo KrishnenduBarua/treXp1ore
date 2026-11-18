@@ -14,7 +14,7 @@ trexplore/
 
 ## 1. Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - A Supabase project (PostgreSQL and Storage)
 
 ## 2. Backend setup
